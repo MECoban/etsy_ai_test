@@ -477,6 +477,92 @@ with tabs[0]:
     st.markdown('<div class="step-header">🎨 Adım 1: Tasarım Seçimi / Üretimi</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">🎨 Step 1: Design Selection / Creation</div>', unsafe_allow_html=True)
     
     if st.session_state['language'] == 'tr':
+        if st.button("AI Tasarım Prompt'ı Oluştur", key="design_prompt_tr"):
+            if product_description and design_theme:
+                with st.spinner("Tasarım prompt'ı oluşturuluyor..."):
+                    try:
+                        system_prompt = "Sen profesyonel bir tasarımcısın. Etsy satışı için AI araçlarında (Midjourney, DALLE) kullanılacak detaylı tasarım prompt'ları oluşturuyorsun."
+                        user_prompt = f"""
+                        Ürün: {product_description}
+                        Kategori: {product_category}
+                        Hedef Kitle: {target_audience}
+                        Tasarım Stili: {design_theme}
+                        Tasarım Türü: {design_type}
+                        
+                        Bu bilgilere göre Midjourney/DALLE için detaylı, profesyonel bir tasarım prompt'ı oluştur. 
+                        Prompt İngilizce olmalı ve şu format kullan:
+                        
+                        1. Ana Prompt (Midjourney/DALLE için)
+                        2. Stil Parametreleri
+                        3. Kalite Ayarları
+                        4. Alternatif Prompt Önerileri (3 adet)
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Lütfen ürün açıklaması ve tasarım teması girin.")
+        
+        # AI Image Generation Section for Turkish
+        st.markdown("---")
+        st.markdown('<div class="section-header">🖼️ AI Tasarım Oluştur</div>', unsafe_allow_html=True)
+        
+        design_prompt_input_tr = st.text_area(
+            "Tasarım prompt'ı:",
+            placeholder="komik gözlüklü kedi t-shirt tasarımı, minimalist stil",
+            height=100,
+            key="design_prompt_input_tr"
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            image_size_tr = st.selectbox(
+                "Görsel boyutu:",
+                ["1024x1024", "1792x1024", "1024x1792"],
+                key="image_size_tr"
+            )
+        with col2:
+            image_quality_tr = st.selectbox(
+                "Kalite:",
+                ["standard", "hd"],
+                key="image_quality_tr"
+            )
+        
+        if st.button("🎨 Tasarım Oluştur", key="generate_design_step1_tr"):
+            if design_prompt_input_tr.strip():
+                with st.spinner("Tasarım oluşturuluyor..."):
+                    try:
+                        response = client.images.generate(
+                            model="dall-e-2",
+                            prompt=design_prompt_input_tr,
+                            size=image_size_tr,
+                            quality=image_quality_tr,
+                            n=1,
+                        )
+                        
+                        image_url = response.data[0].url
+                        st.image(image_url, caption="Oluşturulan Tasarım")
+                        
+                        st.markdown(f"""
+                        <div class="success-box">
+                        ✅ Tasarım başarıyla oluşturuldu!
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Download link
+                        st.markdown(f"**İndir:** [Tasarımı İndir]({image_url})")
+                        
+                    except Exception as e:
+                        if "quota" in str(e).lower() or "insufficient" in str(e).lower():
+                            st.error("🚫 OpenAI API kotanız dolmuş. Lütfen planınızı kontrol edin.")
+                        else:
+                            st.error(f"Hata: {str(e)}")
+            else:
+                st.warning("Lütfen bir tasarım prompt'ı girin.")
+                
         st.markdown("""
         <div class="tip-box">
         💡 <strong>İpucu:</strong> Etsy'den "Digital Download + Commercial Use" filtrelerini kullanarak tasarım alabilir 
@@ -489,7 +575,7 @@ with tabs[0]:
             "Minimalist logo",
             "Vintage poster",
             "Modern tipografi",
-            "Illüstrasyon",
+            "İllüstrasyon",
             "Desen/pattern"
         ])
         
@@ -526,7 +612,7 @@ with tabs[0]:
         st.markdown("""
         <div class="tip-box">
         💡 <strong>Tip:</strong> You can get designs from Etsy using "Digital Download + Commercial Use" filters 
-        or create original designs with AI.
+        or create original designs with AI tools like Midjourney, DALLE, or Leonardo.
         </div>
         """, unsafe_allow_html=True)
         
@@ -538,6 +624,88 @@ with tabs[0]:
             "Illustration",
             "Pattern design"
         ])
+        
+        if st.button("Generate AI Design Prompts", key="design_prompt"):
+            if product_description and design_theme:
+                with st.spinner("Generating design prompts..."):
+                    try:
+                        system_prompt = "You are a professional designer. You create detailed design prompts for AI tools (Midjourney, DALLE) for Etsy sales."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        Target Audience: {target_audience}
+                        Design Style: {design_theme}
+                        Design Type: {design_type}
+                        
+                        Create detailed, professional design prompts for Midjourney/DALLE based on this information:
+                        
+                        1. Main Prompt (for Midjourney/DALLE)
+                        2. Style Parameters
+                        3. Quality Settings
+                        4. Alternative Prompt Suggestions (3 variations)
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter product description and design theme first.")
+                
+        # AI Image Generation Section
+        st.markdown("---")
+        st.markdown('<div class="section-header">🖼️ ' + ('AI Tasarım Oluştur' if st.session_state['language'] == 'tr' else 'Generate AI Design') + '</div>', unsafe_allow_html=True)
+        
+        design_prompt_input = st.text_area(
+            "Tasarım prompt'ı:" if st.session_state['language'] == 'tr' else "Design prompt:",
+            placeholder="funny cat wearing sunglasses t-shirt design, minimalist style" if st.session_state['language'] == 'en' else "komik gözlüklü kedi t-shirt tasarımı, minimalist stil",
+            height=100
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            image_size = st.selectbox(
+                "Görsel boyutu:" if st.session_state['language'] == 'tr' else "Image size:",
+                ["1024x1024", "1792x1024", "1024x1792"]
+            )
+        with col2:
+            image_quality = st.selectbox(
+                "Kalite:" if st.session_state['language'] == 'tr' else "Quality:",
+                ["standard", "hd"]
+            )
+        
+        if st.button("🎨 " + ("Tasarım Oluştur" if st.session_state['language'] == 'tr' else "Generate Design"), key="generate_design_step1"):
+            if design_prompt_input.strip():
+                with st.spinner("Tasarım oluşturuluyor..." if st.session_state['language'] == 'tr' else "Generating design..."):
+                    try:
+                        response = client.images.generate(
+                            model="dall-e-2",
+                            prompt=design_prompt_input,
+                            size=image_size,
+                            quality=image_quality,
+                            n=1,
+                        )
+                        
+                        image_url = response.data[0].url
+                        st.image(image_url, caption="Oluşturulan Tasarım" if st.session_state['language'] == 'tr' else "Generated Design")
+                        
+                        st.markdown(f"""
+                        <div class="success-box">
+                        ✅ {'Tasarım başarıyla oluşturuldu!' if st.session_state['language'] == 'tr' else 'Design generated successfully!'}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Download link
+                        st.markdown(f"**{'İndir:' if st.session_state['language'] == 'tr' else 'Download:'}** [{'Tasarımı İndir' if st.session_state['language'] == 'tr' else 'Download Design'}]({image_url})")
+                        
+                    except Exception as e:
+                        if "quota" in str(e).lower() or "insufficient" in str(e).lower():
+                            st.error("🚫 " + ("OpenAI API kotanız dolmuş. Lütfen planınızı kontrol edin." if st.session_state['language'] == 'tr' else "OpenAI API quota exceeded. Please check your plan."))
+                        else:
+                            st.error(f"{'Hata:' if st.session_state['language'] == 'tr' else 'Error:'} {str(e)}")
+            else:
+                st.warning("Lütfen bir tasarım prompt'ı girin." if st.session_state['language'] == 'tr' else "Please enter a design prompt.")
 
 # Step 2: Design Optimization
 with tabs[1]:
@@ -575,6 +743,42 @@ with tabs[1]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        ✅ <strong>Requirements:</strong><br>
+        • Format: PNG (transparent background)<br>
+        • Size: 4500 x 5400 px<br>
+        • Resolution: 300 DPI<br>
+        • Centered and balanced placement
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Generate Print Preparation Guide", key="print_check"):
+            if product_description:
+                with st.spinner("Generating preparation guide..."):
+                    try:
+                        system_prompt = "You are a printing expert. You provide design optimization advice for DTG (Direct-to-Garment) printing."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        
+                        Create a comprehensive DTG printing design preparation guide for this product:
+                        1. Technical Specifications
+                        2. Color Settings
+                        3. File Format Recommendations
+                        4. Quality Control Checklist
+                        5. Common Mistakes and How to Avoid Them
+                        6. Best Practices for DTG Printing
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 3: Mockup Creation
 with tabs[2]:
@@ -611,6 +815,183 @@ with tabs[2]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        if st.button("AI Mockup Prompt'ı Oluştur", key="mockup_prompt_tr"):
+            with st.spinner("Mockup prompt'ı oluşturuluyor..."):
+                try:
+                    system_prompt = "Sen bir ürün fotoğrafçısısın. Etsy satışları için profesyonel mockup oluşturma konusunda uzmanısın."
+                    user_prompt = f"""
+                    Ürün: {product_description}
+                    Hedef Kitle: {target_audience}
+                    Mockup Türü: {mockup_type}
+                    
+                    Bu ürün için DALLE ile oluşturulacak profesyonel mockup prompt'ı oluştur:
+                    1. Ana görsel prompt
+                    2. Aydınlatma ayarları
+                    3. Arka plan önerileri
+                    4. Çekim açısı önerileri
+                    5. 3 farklı alternatif mockup prompt'ı
+                    """
+                    
+                    result = call_openai(system_prompt, user_prompt)
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                    
+                except Exception as e:
+                    st.error(str(e))
+        
+        # AI Mockup Generation Section for Turkish
+        st.markdown("---")
+        st.markdown('<div class="section-header">📸 AI Mockup Oluştur</div>', unsafe_allow_html=True)
+        
+        mockup_prompt_input_tr = st.text_area(
+            "Mockup prompt'ı:",
+            placeholder="siyah grafik tasarımlı t-shirt giyen genç kadın, yaşam tarzı fotoğrafçılığı, doğal ışık",
+            height=100,
+            key="mockup_prompt_input_tr"
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            mockup_size_tr = st.selectbox(
+                "Mockup boyutu:",
+                ["1024x1024", "1792x1024", "1024x1792"],
+                key="mockup_size_tr"
+            )
+        with col2:
+            mockup_quality_tr = st.selectbox(
+                "Kalite:",
+                ["standard", "hd"],
+                key="mockup_quality_tr"
+            )
+        
+        if st.button("📸 Mockup Oluştur", key="generate_mockup_step3_tr"):
+            if mockup_prompt_input_tr.strip():
+                with st.spinner("Mockup oluşturuluyor..."):
+                    try:
+                        response = client.images.generate(
+                            model="dall-e-2",
+                            prompt=mockup_prompt_input_tr,
+                            size=mockup_size_tr,
+                            quality=mockup_quality_tr,
+                            n=1,
+                        )
+                        
+                        image_url = response.data[0].url
+                        st.image(image_url, caption="Oluşturulan Mockup")
+                        
+                        st.markdown(f"""
+                        <div class="success-box">
+                        ✅ Mockup başarıyla oluşturuldu!
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Download link
+                        st.markdown(f"**İndir:** [Mockup İndir]({image_url})")
+                        
+                    except Exception as e:
+                        if "quota" in str(e).lower() or "insufficient" in str(e).lower():
+                            st.error("🚫 OpenAI API kotanız dolmuş. Lütfen planınızı kontrol edin.")
+                        else:
+                            st.error(f"Hata: {str(e)}")
+            else:
+                st.warning("Lütfen bir mockup prompt'ı girin.")
+                
+        st.markdown("""
+        <div class="tip-box">
+        💡 <strong>İpucu:</strong> En az 2 farklı mockup oluşturun: düz ürün çekimi + yaşam tarzı/model çekimi
+        </div>
+        """, unsafe_allow_html=True)
+        
+        mockup_type = st.selectbox("Select mockup type:", [
+            "Flat t-shirt mockup",
+            "Model wearing mockup",
+            "Lifestyle mockup",
+            "Studio shot mockup",
+            "Flat lay mockup"
+        ])
+        
+        if st.button("Generate AI Mockup Prompts", key="mockup_prompt"):
+            if product_description:
+                with st.spinner("Generating mockup prompts..."):
+                    try:
+                        system_prompt = "You are a product photographer expert specializing in creating professional mockups for Etsy sales."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Target Audience: {target_audience}
+                        Mockup Type: {mockup_type}
+                        
+                        Create professional DALLE prompts for this product mockup:
+                        1. Main visual prompt
+                        2. Lighting setup recommendations
+                        3. Background suggestions
+                        4. Camera angle recommendations
+                        5. 3 alternative mockup prompt variations
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
+                
+        # AI Mockup Generation Section
+        st.markdown("---")
+        st.markdown('<div class="section-header">📸 ' + ('AI Mockup Oluştur' if st.session_state['language'] == 'tr' else 'Generate AI Mockup') + '</div>', unsafe_allow_html=True)
+        
+        mockup_prompt_input = st.text_area(
+            "Mockup prompt'ı:" if st.session_state['language'] == 'tr' else "Mockup prompt:",
+            placeholder="young woman wearing a black t-shirt with graphic design, lifestyle photography, natural lighting" if st.session_state['language'] == 'en' else "siyah grafik tasarımlı t-shirt giyen genç kadın, yaşam tarzı fotoğrafçılığı, doğal ışık",
+            height=100,
+            key="mockup_prompt_input"
+        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            mockup_size = st.selectbox(
+                "Mockup boyutu:" if st.session_state['language'] == 'tr' else "Mockup size:",
+                ["1024x1024", "1792x1024", "1024x1792"],
+                key="mockup_size"
+            )
+        with col2:
+            mockup_quality = st.selectbox(
+                "Kalite:" if st.session_state['language'] == 'tr' else "Quality:",
+                ["standard", "hd"],
+                key="mockup_quality"
+            )
+        
+        if st.button("📸 " + ("Mockup Oluştur" if st.session_state['language'] == 'tr' else "Generate Mockup"), key="generate_mockup_step3"):
+            if mockup_prompt_input.strip():
+                with st.spinner("Mockup oluşturuluyor..." if st.session_state['language'] == 'tr' else "Generating mockup..."):
+                    try:
+                        response = client.images.generate(
+                            model="dall-e-2",
+                            prompt=mockup_prompt_input,
+                            size=mockup_size,
+                            quality=mockup_quality,
+                            n=1,
+                        )
+                        
+                        image_url = response.data[0].url
+                        st.image(image_url, caption="Oluşturulan Mockup" if st.session_state['language'] == 'tr' else "Generated Mockup")
+                        
+                        st.markdown(f"""
+                        <div class="success-box">
+                        ✅ {'Mockup başarıyla oluşturuldu!' if st.session_state['language'] == 'tr' else 'Mockup generated successfully!'}
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Download link
+                        st.markdown(f"**{'İndir:' if st.session_state['language'] == 'tr' else 'Download:'}** [{'Mockup İndir' if st.session_state['language'] == 'tr' else 'Download Mockup'}]({image_url})")
+                        
+                    except Exception as e:
+                        if "quota" in str(e).lower() or "insufficient" in str(e).lower():
+                            st.error("🚫 " + ("OpenAI API kotanız dolmuş. Lütfen planınızı kontrol edin." if st.session_state['language'] == 'tr' else "OpenAI API quota exceeded. Please check your plan."))
+                        else:
+                            st.error(f"{'Hata:' if st.session_state['language'] == 'tr' else 'Error:'} {str(e)}")
+            else:
+                st.warning("Lütfen bir mockup prompt'ı girin." if st.session_state['language'] == 'tr' else "Please enter a mockup prompt.")
 
 # Step 4: Image Preparation
 with tabs[3]:
@@ -639,6 +1020,122 @@ with tabs[3]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        ✅ <strong>Etsy Image Requirements:</strong><br>
+        • Size: Square (2000x2000 px or larger)<br>
+        • Format: JPEG or PNG<br>
+        • Up to 10 images per listing<br>
+        • First image is most important for search
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Generate Image Optimization Guide", key="image_guide"):
+            if product_description:
+                with st.spinner("Generating image guide..."):
+                    try:
+                        system_prompt = "You are an e-commerce visual expert specializing in Etsy product image optimization."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        
+                        Create a comprehensive Etsy image optimization guide for this product:
+                        1. Image size and format specifications (2000x2000px square format)
+                        2. Main product image characteristics
+                        3. Additional images (mockups, details, usage)
+                        4. SEO alt text suggestions
+                        5. Image sequence strategy
+                        6. Mobile optimization tips
+                        7. Best practices for Etsy search visibility
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
+                
+        # AI Image Enhancement Section for Turkish
+        st.markdown("---")
+        st.markdown('<div class="section-header">✨ Görsel İyileştirme</div>', unsafe_allow_html=True)
+        
+        uploaded_image_tr = st.file_uploader(
+            "Görseli yükleyin:",
+            type=['png', 'jpg', 'jpeg'],
+            key="enhance_image_upload_tr"
+        )
+        
+        if uploaded_image_tr is not None:
+            st.image(uploaded_image_tr, caption="Orijinal Görsel", width=300)
+            
+            enhancement_prompt_tr = st.text_area(
+                "İyileştirme talimatı:",
+                placeholder="bu görseli daha profesyonel yap, parlaklık ve kontrastı artır",
+                height=80,
+                key="enhancement_prompt_tr"
+            )
+            
+            if st.button("✨ Görseli İyileştir", key="enhance_image_step4_tr"):
+                if enhancement_prompt_tr.strip():
+                    with st.spinner("Görsel iyileştiriliyor..."):
+                        try:
+                            # Convert uploaded image to BytesIO
+                            image = Image.open(uploaded_image_tr)
+                            
+                            # Convert to RGB if necessary
+                            if image.mode in ('RGBA', 'LA', 'P'):
+                                image = image.convert('RGB')
+                            
+                            # Save to BytesIO
+                            img_buffer = io.BytesIO()
+                            image.save(img_buffer, format='PNG')
+                            img_buffer.seek(0)
+                            
+                            response = client.images.edit(
+                                model="dall-e-2",
+                                image=img_buffer,
+                                prompt=enhancement_prompt_tr,
+                                size="1024x1024",
+                                n=1
+                            )
+                            
+                            enhanced_url = response.data[0].url
+                            
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.image(uploaded_image_tr, caption="Orijinal", width=250)
+                            with col2:
+                                st.image(enhanced_url, caption="İyileştirilmiş", width=250)
+                            
+                            st.markdown(f"""
+                            <div class="success-box">
+                            ✅ Görsel başarıyla iyileştirildi!
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            # Download link
+                            st.markdown(f"**İndir:** [İyileştirilmiş Görseli İndir]({enhanced_url})")
+                            
+                        except Exception as e:
+                            if "quota" in str(e).lower() or "insufficient" in str(e).lower():
+                                st.error("🚫 OpenAI API kotanız dolmuş. Lütfen planınızı kontrol edin.")
+                            else:
+                                st.error(f"Hata: {str(e)}")
+                else:
+                    st.warning("Lütfen iyileştirme talimatı girin.")
+                    
+        st.markdown("""
+        <div class="tip-box">
+        ✅ <strong>Etsy Görsel Gereksinimleri:</strong><br>
+        • Boyut: Kare (2000x2000 px veya daha büyük)<br>
+        • Format: JPEG veya PNG<br>
+        • Listeleme başına 10 görsele kadar<br>
+        • İlk görsel arama için en önemli
+        </div>
+        """, unsafe_allow_html=True)
 
 # Step 5: Title Creation
 with tabs[4]:
@@ -672,6 +1169,43 @@ with tabs[4]:
                         st.error(str(e))
             else:
                 st.warning("Lütfen ürün açıklaması girin.")
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        📝 <strong>Title Requirements:</strong><br>
+        • Length: 130-140 characters<br>
+        • Include: keywords + theme + target audience + product type<br>
+        • Example: "Witchy Halloween Shirt For Women Retro Vintage Cute Spooky T-Shirt Gift For Her Fall Graphic"
+        </div>
+        """, unsafe_allow_html=True)
+        
+        num_titles = st.slider("How many titles to generate?", 1, 10, 5)
+        
+        if st.button("Generate SEO Optimized Titles", key="titles"):
+            if product_description:
+                with st.spinner("Generating titles..."):
+                    try:
+                        system_prompt = "You are an Etsy SEO expert. You create high-converting titles between 130-140 characters that maximize search visibility."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        Target Audience: {target_audience}
+                        Style: {design_theme}
+                        
+                        Create {num_titles} SEO optimized Etsy titles:
+                        - Each title 130-140 characters
+                        - Keywords + theme + target audience + product type
+                        - Use high search volume keywords
+                        - Include character count at the end of each title
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 6: Tag Creation
 with tabs[5]:
@@ -706,6 +1240,45 @@ with tabs[5]:
                         st.error(str(e))
             else:
                 st.warning("Lütfen ürün açıklaması girin.")
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        🏷️ <strong>Tag Requirements:</strong><br>
+        • 13 tags available<br>
+        • Max 20 characters each<br>
+        • Comma-separated format<br>
+        • Mix of long-tail and short-tail keywords
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Generate 13 Etsy Tags", key="tags"):
+            if product_description:
+                with st.spinner("Generating tags..."):
+                    try:
+                        system_prompt = "You are an Etsy SEO expert. You create high search volume tags, each maximum 20 characters."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        Target Audience: {target_audience}
+                        Style: {design_theme}
+                        
+                        Create 13 Etsy tags:
+                        - Each tag maximum 20 characters
+                        - Comma-separated single line format
+                        - High search volume keywords
+                        - Mix of long-tail and short-tail keywords
+                        - Include seasonally relevant tags
+                        
+                        Format: tag1,tag2,tag3...
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 7: Description Creation
 with tabs[6]:
@@ -744,6 +1317,49 @@ with tabs[6]:
                         st.error(str(e))
             else:
                 st.warning("Lütfen ürün açıklaması girin.")
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        📄 <strong>Description Format:</strong><br>
+        • Start with bold product title<br>
+        • Include product story and benefits<br>
+        • Add technical specifications<br>
+        • Care instructions and usage suggestions
+        </div>
+        """, unsafe_allow_html=True)
+        
+        material = st.text_input("Material:", placeholder="e.g., 100% Cotton")
+        print_method = st.selectbox("Print Method:", ["DTG (Direct-to-Garment)", "Screen Print", "Heat Transfer", "Vinyl"])
+        
+        if st.button("Generate Product Description", key="description"):
+            if product_description:
+                with st.spinner("Generating description..."):
+                    try:
+                        system_prompt = "You are an Etsy copywriting expert. You write sales-focused, persuasive product descriptions."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Target Audience: {target_audience}
+                        Material: {material}
+                        Print Method: {print_method}
+                        
+                        Create a professional Etsy product description:
+                        1. Bold title (product name)
+                        2. Product story and benefits
+                        3. Technical specifications
+                        4. Care instructions
+                        5. Event/usage suggestions
+                        6. Purchase incentive
+                        
+                        Format: Use Markdown, include emojis
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt, 1000)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 8: Variations Setup
 with tabs[7]:
@@ -773,6 +1389,43 @@ with tabs[7]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        🎨 <strong>Variation Options:</strong><br>
+        • Colors: Black, White, Heather Gray, Navy, etc.<br>
+        • Sizes: S, M, L, XL, 2XL, 3XL<br>
+        • Enable "Product with variations" in Etsy<br>
+        • Set stock and price for each variation
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Generate Color & Size Variation Strategy", key="variations"):
+            if product_description:
+                with st.spinner("Generating variations..."):
+                    try:
+                        system_prompt = "You are an e-commerce expert. You recommend optimal color and size variations for Etsy."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Target Audience: {target_audience}
+                        Design Style: {design_theme}
+                        
+                        Create an Etsy variation strategy for this product:
+                        1. Recommended colors (top 5-8 popular colors)
+                        2. Size range (S-3XL)
+                        3. Sales potential for each variation
+                        4. Inventory management recommendations
+                        5. Price differentiation strategy
+                        6. Which variations to start with
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 9: Pricing Strategy
 with tabs[8]:
@@ -807,6 +1460,48 @@ with tabs[8]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        💰 <strong>Pricing Psychology:</strong><br>
+        • Set higher list price, then create discount campaigns<br>
+        • Example: List at $39.95, run 40% off to sell at $23.95<br>
+        • Use time-limited campaigns for urgency<br>
+        • "Sale ends in X hours" creates urgency
+        </div>
+        """, unsafe_allow_html=True)
+        
+        cost_price = st.number_input("Cost Price (USD):", min_value=0.0, value=10.0, step=0.5)
+        target_margin = st.slider("Target Profit Margin (%):", 10, 200, 60)
+        
+        if st.button("Generate Pricing Strategy", key="pricing"):
+            if product_description:
+                with st.spinner("Generating pricing strategy..."):
+                    try:
+                        system_prompt = "You are an e-commerce pricing expert. You create optimal pricing strategies for Etsy using sales psychology."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Target Audience: {target_audience}
+                        Cost: ${cost_price}
+                        Target Margin: {target_margin}%
+                        
+                        Create a strategic pricing plan for Etsy:
+                        1. Recommended list price
+                        2. Actual selling price
+                        3. Discount strategy (40% OFF appearance)
+                        4. Seasonal price adjustments
+                        5. Competitor analysis recommendations
+                        6. Price testing strategies
+                        7. Bundle/package deal suggestions
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 10: Listing Checklist
 with tabs[9]:
@@ -838,6 +1533,47 @@ with tabs[9]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        ✅ <strong>Pre-Launch Checklist:</strong><br>
+        • All images uploaded and optimized<br>
+        • Title within 130-140 characters<br>
+        • All 13 tags used<br>
+        • Complete product description<br>
+        • Pricing and variations set<br>
+        • Shipping and return policies configured
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Generate Complete Listing Checklist", key="checklist"):
+            if product_description:
+                with st.spinner("Generating checklist..."):
+                    try:
+                        system_prompt = "You are an Etsy expert. You create comprehensive pre-listing checklists."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        
+                        Create a comprehensive pre-launch checklist for Etsy:
+                        1. Image controls (10 items)
+                        2. Text controls (title, description, tags)
+                        3. Price and variation controls
+                        4. SEO optimization controls
+                        5. Legal/copyright controls
+                        6. Shipping and return policies
+                        7. Final control items
+                        
+                        Present each item in checkbox format.
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 11: SEO & Promotion
 with tabs[10]:
@@ -872,6 +1608,49 @@ with tabs[10]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        📈 <strong>Promotion Channels:</strong><br>
+        • Etsy Ads: Start with $1-2 daily budget<br>
+        • Pinterest: Share product images<br>
+        • Social Media: Instagram, Facebook, TikTok<br>
+        • Content Marketing: Blog posts, tutorials<br>
+        • Email Marketing: Build customer list
+        </div>
+        """, unsafe_allow_html=True)
+        
+        budget = st.number_input("Daily Ad Budget (USD):", min_value=1.0, value=5.0, step=1.0)
+        
+        if st.button("Generate Promotion Strategy", key="promotion"):
+            if product_description:
+                with st.spinner("Generating promotion plan..."):
+                    try:
+                        system_prompt = "You are a digital marketing expert. You create comprehensive promotion strategies for Etsy products."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Target Audience: {target_audience}
+                        Daily Budget: ${budget}
+                        
+                        Create a 30-day Etsy promotion strategy:
+                        1. First 7 days: Launch strategy
+                        2. Etsy Ads optimization
+                        3. Pinterest marketing plan
+                        4. Social media strategy
+                        5. Content marketing recommendations
+                        6. Influencer collaborations
+                        7. Email marketing
+                        8. Seasonal campaign recommendations
+                        9. Performance tracking metrics
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt, 1200)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 12: Analytics & Optimization
 with tabs[11]:
@@ -904,6 +1683,47 @@ with tabs[11]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        📊 <strong>Key Metrics to Track:</strong><br>
+        • Views, Clicks, Conversion Rate<br>
+        • Favorites and Cart Additions<br>
+        • Search Position for Key Terms<br>
+        • Competitor Performance<br>
+        • Seasonal Trends
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if st.button("Generate Optimization Guide", key="optimization"):
+            if product_description:
+                with st.spinner("Generating optimization plan..."):
+                    try:
+                        system_prompt = "You are an e-commerce analytics expert. You analyze Etsy product performance and provide optimization recommendations."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        Category: {product_category}
+                        
+                        Create an Etsy product optimization guide:
+                        1. Metrics to track
+                        2. Weekly analysis routine
+                        3. Low performance indicators
+                        4. Title optimization strategies
+                        5. Image refresh techniques
+                        6. Price optimization tests
+                        7. Tag A/B test recommendations
+                        8. Seasonal update plan
+                        9. Competitor analysis methods
+                        10. Conversion rate improvement
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt, 1200)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Step 13: Order Management
 with tabs[12]:
@@ -944,6 +1764,55 @@ with tabs[12]:
                     
                 except Exception as e:
                     st.error(str(e))
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        🚚 <strong>Order Management Setup:</strong><br>
+        • Connect Etsy to Print-on-Demand service<br>
+        • Set up automatic order processing<br>
+        • Configure quality control protocols<br>
+        • Create customer communication templates<br>
+        • Set up tracking and shipping notifications
+        </div>
+        """, unsafe_allow_html=True)
+        
+        pod_service = st.selectbox("Print-on-Demand Service:", [
+            "Printify",
+            "Printful",
+            "Gooten",
+            "Lulu xPress",
+            "Self Production"
+        ])
+        
+        if st.button("Setup Order Management System", key="order_mgmt"):
+            if product_description:
+                with st.spinner("Setting up order system..."):
+                    try:
+                        system_prompt = "You are an e-commerce operations expert. You specialize in print-on-demand and order management systems."
+                        user_prompt = f"""
+                        Product: {product_description}
+                        POD Service: {pod_service}
+                        
+                        Set up a comprehensive order management system:
+                        1. {pod_service} integration steps
+                        2. Automatic order processing settings
+                        3. Quality control protocols
+                        4. Customer communication templates
+                        5. Shipping tracking system
+                        6. Return/exchange procedures
+                        7. Inventory management
+                        8. Customer service protocols
+                        9. Problem resolution guide
+                        10. Performance monitoring metrics
+                        """
+                        
+                        result = call_openai(system_prompt, user_prompt, 1200)
+                        st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+                        
+                    except Exception as e:
+                        st.error(str(e))
+            else:
+                st.warning("Please enter a product description first.")
 
 # Footer
 st.markdown("---")

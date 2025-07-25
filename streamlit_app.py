@@ -1,11 +1,11 @@
 import streamlit as st
-import os
+import openai
 from openai import OpenAI
-import base64
-import requests
-from PIL import Image
-from io import BytesIO
+import os
 from dotenv import load_dotenv
+from PIL import Image
+import io
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -477,6 +477,22 @@ with tabs[0]:
     st.markdown('<div class="step-header">🎨 Adım 1: Tasarım Seçimi / Üretimi</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">🎨 Step 1: Design Selection / Creation</div>', unsafe_allow_html=True)
     
     if st.session_state['language'] == 'tr':
+        st.markdown("""
+        <div class="tip-box">
+        💡 <strong>İpucu:</strong> Etsy'den "Digital Download + Commercial Use" filtrelerini kullanarak tasarım alabilir 
+        veya AI ile özgün tasarımlar oluşturabilirsiniz.
+        </div>
+        """, unsafe_allow_html=True)
+        
+        design_type = st.selectbox("Tasarım türü seçin:", [
+            "T-shirt grafik tasarımı",
+            "Minimalist logo",
+            "Vintage poster",
+            "Modern tipografi",
+            "İllüstrasyon",
+            "Desen/pattern"
+        ])
+        
         if st.button("AI Tasarım Prompt'ı Oluştur", key="design_prompt_tr"):
             if product_description and design_theme:
                 with st.spinner("Tasarım prompt'ı oluşturuluyor..."):
@@ -517,19 +533,11 @@ with tabs[0]:
             key="design_prompt_input_tr"
         )
         
-        col1, col2 = st.columns(2)
-        with col1:
-            image_size_tr = st.selectbox(
-                "Görsel boyutu:",
-                ["1024x1024", "1792x1024", "1024x1792"],
-                key="image_size_tr"
-            )
-        with col2:
-            image_quality_tr = st.selectbox(
-                "Kalite:",
-                ["standard", "hd"],
-                key="image_quality_tr"
-            )
+        image_size_tr = st.selectbox(
+            "Görsel boyutu:",
+            ["1024x1024", "1792x1024", "1024x1792"],
+            key="image_size_tr"
+        )
         
         if st.button("🎨 Tasarım Oluştur", key="generate_design_step1_tr"):
             if design_prompt_input_tr.strip():
@@ -539,7 +547,6 @@ with tabs[0]:
                             model="dall-e-2",
                             prompt=design_prompt_input_tr,
                             size=image_size_tr,
-                            quality=image_quality_tr,
                             n=1,
                         )
                         
@@ -563,23 +570,7 @@ with tabs[0]:
             else:
                 st.warning("Lütfen bir tasarım prompt'ı girin.")
                 
-        st.markdown("""
-        <div class="tip-box">
-        💡 <strong>İpucu:</strong> Etsy'den "Digital Download + Commercial Use" filtrelerini kullanarak tasarım alabilir 
-        veya AI ile özgün tasarımlar oluşturabilirsiniz.
-        </div>
-        """, unsafe_allow_html=True)
-        
-        design_type = st.selectbox("Tasarım türü seçin:", [
-            "T-shirt grafik tasarımı",
-            "Minimalist logo",
-            "Vintage poster",
-            "Modern tipografi",
-            "İllüstrasyon",
-            "Desen/pattern"
-        ])
-        
-        if st.button("AI Tasarım Prompt'ı Oluştur", key="design_prompt"):
+        if st.button("Alternatif Tasarım Prompt'ı Oluştur", key="design_prompt_alt"):
             if product_description and design_theme:
                 with st.spinner("Tasarım prompt'ı oluşturuluyor..."):
                     try:
@@ -663,17 +654,10 @@ with tabs[0]:
             height=100
         )
         
-        col1, col2 = st.columns(2)
-        with col1:
-            image_size = st.selectbox(
-                "Görsel boyutu:" if st.session_state['language'] == 'tr' else "Image size:",
-                ["1024x1024", "1792x1024", "1024x1792"]
-            )
-        with col2:
-            image_quality = st.selectbox(
-                "Kalite:" if st.session_state['language'] == 'tr' else "Quality:",
-                ["standard", "hd"]
-            )
+        image_size = st.selectbox(
+            "Görsel boyutu:" if st.session_state['language'] == 'tr' else "Image size:",
+            ["1024x1024", "1792x1024", "1024x1792"]
+        )
         
         if st.button("🎨 " + ("Tasarım Oluştur" if st.session_state['language'] == 'tr' else "Generate Design"), key="generate_design_step1"):
             if design_prompt_input.strip():
@@ -683,7 +667,6 @@ with tabs[0]:
                             model="dall-e-2",
                             prompt=design_prompt_input,
                             size=image_size,
-                            quality=image_quality,
                             n=1,
                         )
                         
@@ -850,19 +833,11 @@ with tabs[2]:
             key="mockup_prompt_input_tr"
         )
         
-        col1, col2 = st.columns(2)
-        with col1:
-            mockup_size_tr = st.selectbox(
-                "Mockup boyutu:",
-                ["1024x1024", "1792x1024", "1024x1792"],
-                key="mockup_size_tr"
-            )
-        with col2:
-            mockup_quality_tr = st.selectbox(
-                "Kalite:",
-                ["standard", "hd"],
-                key="mockup_quality_tr"
-            )
+        mockup_size_tr = st.selectbox(
+            "Mockup boyutu:",
+            ["1024x1024", "1792x1024", "1024x1792"],
+            key="mockup_size_tr"
+        )
         
         if st.button("📸 Mockup Oluştur", key="generate_mockup_step3_tr"):
             if mockup_prompt_input_tr.strip():
@@ -872,7 +847,6 @@ with tabs[2]:
                             model="dall-e-2",
                             prompt=mockup_prompt_input_tr,
                             size=mockup_size_tr,
-                            quality=mockup_quality_tr,
                             n=1,
                         )
                         
@@ -947,19 +921,11 @@ with tabs[2]:
             key="mockup_prompt_input"
         )
         
-        col1, col2 = st.columns(2)
-        with col1:
-            mockup_size = st.selectbox(
-                "Mockup boyutu:" if st.session_state['language'] == 'tr' else "Mockup size:",
-                ["1024x1024", "1792x1024", "1024x1792"],
-                key="mockup_size"
-            )
-        with col2:
-            mockup_quality = st.selectbox(
-                "Kalite:" if st.session_state['language'] == 'tr' else "Quality:",
-                ["standard", "hd"],
-                key="mockup_quality"
-            )
+        mockup_size = st.selectbox(
+            "Mockup boyutu:" if st.session_state['language'] == 'tr' else "Mockup size:",
+            ["1024x1024", "1792x1024", "1024x1792"],
+            key="mockup_size"
+        )
         
         if st.button("📸 " + ("Mockup Oluştur" if st.session_state['language'] == 'tr' else "Generate Mockup"), key="generate_mockup_step3"):
             if mockup_prompt_input.strip():
@@ -969,7 +935,6 @@ with tabs[2]:
                             model="dall-e-2",
                             prompt=mockup_prompt_input,
                             size=mockup_size,
-                            quality=mockup_quality,
                             n=1,
                         )
                         

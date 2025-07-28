@@ -669,6 +669,524 @@ def render_step_7():
                 st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
 
 
+def render_step_8():
+    """Render Step 8: Variation Setup"""
+    st.markdown('<div class="step-header">⚙️ Adım 8: Varyasyon Ayarları</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">⚙️ Step 8: Variation Setup</div>', unsafe_allow_html=True)
+    
+    if st.session_state['language'] == 'tr':
+        st.markdown("""
+        <div class="tip-box">
+        💡 <strong>Varyasyon İpuçları:</strong><br>
+        • Renk, boyut, malzeme gibi seçenekler sunun<br>
+        • Her varyasyon için ayrı fotoğraf ekleyin<br>
+        • Stok takibi yapın<br>
+        • Fiyat farklılıklarını belirtin
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            variation_type = st.selectbox(
+                "Varyasyon tipi:",
+                ["Renk", "Boyut", "Malzeme", "Stil", "Set/Paket"]
+            )
+            
+        with col2:
+            num_variations = st.slider("Varyasyon sayısı:", 2, 10, 3)
+        
+        if st.button("🎯 Varyasyon Stratejisi Oluştur"):
+            with st.spinner("Varyasyon stratejisi oluşturuluyor..."):
+                system_prompt = "Sen bir Etsy varyasyon uzmanısın. Satışları artıran varyasyon stratejileri geliştiriyorsun."
+                user_prompt = f"""
+                Ürün: {get_form_data('product_description')}
+                Kategori: {get_form_data('product_category')}
+                Varyasyon Tipi: {variation_type}
+                Varyasyon Sayısı: {num_variations}
+                
+                Bu ürün için varyasyon stratejisi oluştur:
+                1. Önerilen varyasyon seçenekleri
+                2. Her varyasyon için fiyatlandırma önerileri
+                3. Varyasyon görsellerinin nasıl olması gerektiği
+                4. Stok yönetimi ipuçları
+                5. Müşteri seçim kolaylığı için düzenleme önerileri
+                6. Varyasyon SEO optimizasyonu
+                """
+                
+                result = call_openai(system_prompt, user_prompt)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        💡 <strong>Variation Tips:</strong><br>
+        • Offer color, size, material options<br>
+        • Add separate photos for each variation<br>
+        • Track inventory<br>
+        • Set price differences
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            variation_type = st.selectbox(
+                "Variation type:",
+                ["Color", "Size", "Material", "Style", "Set/Bundle"]
+            )
+            
+        with col2:
+            num_variations = st.slider("Number of variations:", 2, 10, 3)
+        
+        if st.button("🎯 Generate Variation Strategy"):
+            with st.spinner("Generating variation strategy..."):
+                system_prompt = "You are an Etsy variation expert. Develop variation strategies that increase sales."
+                user_prompt = f"""
+                Product: {get_form_data('product_description')}
+                Category: {get_form_data('product_category')}
+                Variation Type: {variation_type}
+                Number of Variations: {num_variations}
+                
+                Create a variation strategy for this product:
+                1. Recommended variation options
+                2. Pricing suggestions for each variation
+                3. How variation images should look
+                4. Inventory management tips
+                5. Organization tips for customer selection ease
+                6. Variation SEO optimization
+                """
+                
+                result = call_openai(system_prompt, user_prompt)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+
+
+def render_step_9():
+    """Render Step 9: Pricing Strategy"""
+    st.markdown('<div class="step-header">💰 Adım 9: Fiyatlandırma Stratejisi</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">💰 Step 9: Pricing Strategy</div>', unsafe_allow_html=True)
+    
+    if st.session_state['language'] == 'tr':
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            material_cost = st.number_input("Malzeme maliyeti ($):", min_value=0.0, value=5.0, step=0.5)
+        with col2:
+            time_hours = st.number_input("Çalışma saati:", min_value=0.1, value=2.0, step=0.1)
+        with col3:
+            hourly_rate = st.number_input("Saat ücreti ($):", min_value=5.0, value=20.0, step=1.0)
+        
+        target_margin = st.slider("Hedef kar marjı (%):", 20, 80, 50)
+        
+        if st.button("💰 Fiyat Stratejisi Oluştur"):
+            with st.spinner("Fiyat analizi yapılıyor..."):
+                system_prompt = "Sen bir Etsy fiyatlandırma uzmanısın. Psikoloji temelli ve rekabetçi fiyatlandırma stratejileri geliştiriyorsun."
+                user_prompt = f"""
+                Ürün: {get_form_data('product_description')}
+                Kategori: {get_form_data('product_category')}
+                Malzeme Maliyeti: ${material_cost}
+                Çalışma Saati: {time_hours} saat
+                Saat Ücreti: ${hourly_rate}
+                Hedef Kar Marjı: %{target_margin}
+                
+                Bu ürün için kapsamlı fiyatlandırma stratejisi oluştur:
+                1. Maliyet analizi ve hesaplaması
+                2. Piyasa araştırması ve rekabet analizi
+                3. Psikolojik fiyatlandırma teknikleri
+                4. Promosyon ve indirim stratejileri
+                5. Değer algısını artırma yöntemleri
+                6. Fiyat testleri ve optimizasyon önerileri
+                7. Minimum ve maksimum fiyat önerileri
+                """
+                
+                result = call_openai(system_prompt, user_prompt)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+    else:
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            material_cost = st.number_input("Material cost ($):", min_value=0.0, value=5.0, step=0.5)
+        with col2:
+            time_hours = st.number_input("Work hours:", min_value=0.1, value=2.0, step=0.1)
+        with col3:
+            hourly_rate = st.number_input("Hourly rate ($):", min_value=5.0, value=20.0, step=1.0)
+        
+        target_margin = st.slider("Target profit margin (%):", 20, 80, 50)
+        
+        if st.button("💰 Generate Pricing Strategy"):
+            with st.spinner("Analyzing pricing..."):
+                system_prompt = "You are an Etsy pricing expert. Develop psychology-based and competitive pricing strategies."
+                user_prompt = f"""
+                Product: {get_form_data('product_description')}
+                Category: {get_form_data('product_category')}
+                Material Cost: ${material_cost}
+                Work Hours: {time_hours} hours
+                Hourly Rate: ${hourly_rate}
+                Target Margin: {target_margin}%
+                
+                Create comprehensive pricing strategy for this product:
+                1. Cost analysis and calculation
+                2. Market research and competition analysis
+                3. Psychological pricing techniques
+                4. Promotion and discount strategies
+                5. Value perception enhancement methods
+                6. Price testing and optimization recommendations
+                7. Minimum and maximum price suggestions
+                """
+                
+                result = call_openai(system_prompt, user_prompt)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+
+
+def render_step_10():
+    """Render Step 10: Listing Checklist"""
+    st.markdown('<div class="step-header">✅ Adım 10: İlan Kontrol Listesi</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">✅ Step 10: Listing Checklist</div>', unsafe_allow_html=True)
+    
+    if st.session_state['language'] == 'tr':
+        st.markdown("""
+        <div class="tip-box">
+        🎯 <strong>İlan Kontrolü:</strong> Yayınlamadan önce tüm öğeleri kontrol edin
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Checklist items
+        checklist_items = [
+            "Ürün açıklaması dolduruldu",
+            "Kategori seçildi",
+            "Başlık 130-140 karakter arası",
+            "13 etiket eklendi",
+            "Ana görsel yüklendi (2000x2000px)",
+            "Ek görseller eklendi",
+            "Fiyat belirlendi",
+            "Varyasyonlar ayarlandı",
+            "Kargo bilgileri girildi",
+            "Stok miktarı belirlendi"
+        ]
+        
+        st.markdown("### 📋 İlan Kontrol Listesi")
+        
+        for i, item in enumerate(checklist_items):
+            st.checkbox(item, key=f"checklist_{i}")
+        
+        if st.button("🔍 İlan Analizi Yap"):
+            with st.spinner("İlan analizi yapılıyor..."):
+                system_prompt = "Sen bir Etsy ilanı optimizasyon uzmanısın. İlanları analiz edip iyileştirme önerileri sunuyorsun."
+                user_prompt = f"""
+                Ürün: {get_form_data('product_description')}
+                Kategori: {get_form_data('product_category')}
+                Hedef Kitle: {get_form_data('target_audience')}
+                
+                Bu ürün için detaylı ilanı analizi yap:
+                1. İlan tamamlılık skoru
+                2. SEO optimizasyon durumu
+                3. Görsel kalite değerlendirmesi
+                4. Rekabet avantajları
+                5. Geliştirilmesi gereken alanlar
+                6. Yayınlama öncesi son kontroller
+                7. İlan performansını artırma önerileri
+                """
+                
+                result = call_openai(system_prompt, user_prompt)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        🎯 <strong>Listing Check:</strong> Review all elements before publishing
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Checklist items
+        checklist_items = [
+            "Product description completed",
+            "Category selected",
+            "Title 130-140 characters",
+            "13 tags added",
+            "Main image uploaded (2000x2000px)",
+            "Additional images added",
+            "Price set",
+            "Variations configured",
+            "Shipping info entered",
+            "Stock quantity set"
+        ]
+        
+        st.markdown("### 📋 Listing Checklist")
+        
+        for i, item in enumerate(checklist_items):
+            st.checkbox(item, key=f"checklist_en_{i}")
+        
+        if st.button("🔍 Analyze Listing"):
+            with st.spinner("Analyzing listing..."):
+                system_prompt = "You are an Etsy listing optimization expert. Analyze listings and provide improvement suggestions."
+                user_prompt = f"""
+                Product: {get_form_data('product_description')}
+                Category: {get_form_data('product_category')}
+                Target Audience: {get_form_data('target_audience')}
+                
+                Perform detailed listing analysis for this product:
+                1. Listing completeness score
+                2. SEO optimization status
+                3. Image quality assessment
+                4. Competitive advantages
+                5. Areas for improvement
+                6. Pre-launch final checks
+                7. Listing performance enhancement suggestions
+                """
+                
+                result = call_openai(system_prompt, user_prompt)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+
+
+def render_step_11():
+    """Render Step 11: SEO & Promotion"""
+    st.markdown('<div class="step-header">📈 Adım 11: SEO ve Tanıtım</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">📈 Step 11: SEO & Promotion</div>', unsafe_allow_html=True)
+    
+    if st.session_state['language'] == 'tr':
+        promo_type = st.selectbox(
+            "Tanıtım stratejisi:",
+            ["Sosyal Medya Kampanyası", "İnfluencer İşbirliği", "Email Marketing", "Pinterest SEO", "Blog İçeriği"]
+        )
+        
+        budget = st.slider("Tanıtım bütçesi ($):", 0, 500, 50)
+        
+        if st.button("📈 SEO & Tanıtım Planı Oluştur"):
+            with st.spinner("SEO ve tanıtım planı hazırlanıyor..."):
+                system_prompt = "Sen bir Etsy SEO ve pazarlama uzmanısın. Organik trafik ve satış artırıcı stratejiler geliştiriyorsun."
+                user_prompt = f"""
+                Ürün: {get_form_data('product_description')}
+                Kategori: {get_form_data('product_category')}
+                Hedef Kitle: {get_form_data('target_audience')}
+                Tanıtım Tipi: {promo_type}
+                Bütçe: ${budget}
+                
+                Bu ürün için kapsamlı SEO ve tanıtım planı oluştur:
+                1. Etsy SEO optimizasyon rehberi
+                2. Anahtar kelime araştırması ve strateji
+                3. Sosyal medya tanıtım planı
+                4. Pinterest SEO stratejisi
+                5. İnfluencer işbirliği önerileri
+                6. Email marketing kampanyası
+                7. Ücretsiz tanıtım yöntemleri
+                8. Bütçe dağılımı ve ROI beklentileri
+                """
+                
+                result = call_openai(system_prompt, user_prompt, max_tokens=1200)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+    else:
+        promo_type = st.selectbox(
+            "Promotion strategy:",
+            ["Social Media Campaign", "Influencer Collaboration", "Email Marketing", "Pinterest SEO", "Blog Content"]
+        )
+        
+        budget = st.slider("Promotion budget ($):", 0, 500, 50)
+        
+        if st.button("📈 Generate SEO & Promotion Plan"):
+            with st.spinner("Creating SEO and promotion plan..."):
+                system_prompt = "You are an Etsy SEO and marketing expert. Develop strategies to increase organic traffic and sales."
+                user_prompt = f"""
+                Product: {get_form_data('product_description')}
+                Category: {get_form_data('product_category')}
+                Target Audience: {get_form_data('target_audience')}
+                Promotion Type: {promo_type}
+                Budget: ${budget}
+                
+                Create comprehensive SEO and promotion plan for this product:
+                1. Etsy SEO optimization guide
+                2. Keyword research and strategy
+                3. Social media promotion plan
+                4. Pinterest SEO strategy
+                5. Influencer collaboration suggestions
+                6. Email marketing campaign
+                7. Free promotion methods
+                8. Budget allocation and ROI expectations
+                """
+                
+                result = call_openai(system_prompt, user_prompt, max_tokens=1200)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+
+
+def render_step_12():
+    """Render Step 12: Analytics & Optimization"""
+    st.markdown('<div class="step-header">📊 Adım 12: Analitik ve Optimizasyon</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">📊 Step 12: Analytics & Optimization</div>', unsafe_allow_html=True)
+    
+    if st.session_state['language'] == 'tr':
+        st.markdown("""
+        <div class="tip-box">
+        📊 <strong>Etsy Stats İpuçları:</strong><br>
+        • Günlük görüntülenme sayılarını takip edin<br>
+        • Favorileme oranını kontrol edin<br>
+        • Arama terimlerini analiz edin<br>
+        • Rekabet analizi yapın
+        </div>
+        """, unsafe_allow_html=True)
+        
+        analysis_period = st.selectbox(
+            "Analiz dönemi:",
+            ["İlk 7 gün", "İlk 30 gün", "İlk 3 ay", "Uzun dönem (6+ ay)"]
+        )
+        
+        if st.button("📊 Performans Analiz Planı Oluştur"):
+            with st.spinner("Analiz planı hazırlanıyor..."):
+                system_prompt = "Sen bir Etsy analitik uzmanısın. Veri odaklı optimizasyon stratejileri geliştiriyorsun."
+                user_prompt = f"""
+                Ürün: {get_form_data('product_description')}
+                Kategori: {get_form_data('product_category')}
+                Analiz Dönemi: {analysis_period}
+                
+                Bu ürün için kapsamlı analitik ve optimizasyon planı oluştur:
+                1. Takip edilmesi gereken anahtar metrikler
+                2. Etsy Stats kullanım rehberi
+                3. A/B test önerileri (başlık, fiyat, görsel)
+                4. Rekabet analizi yöntemleri
+                5. Sezonsal trendleri değerlendirme
+                6. Performans iyileştirme aksiyon planı
+                7. Başarı göstergeleri ve hedefler
+                8. Veri toplama ve raporlama stratejisi
+                """
+                
+                result = call_openai(system_prompt, user_prompt, max_tokens=1200)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        📊 <strong>Etsy Stats Tips:</strong><br>
+        • Track daily view counts<br>
+        • Monitor favoriting rate<br>
+        • Analyze search terms<br>
+        • Conduct competitor analysis
+        </div>
+        """, unsafe_allow_html=True)
+        
+        analysis_period = st.selectbox(
+            "Analysis period:",
+            ["First 7 days", "First 30 days", "First 3 months", "Long term (6+ months)"]
+        )
+        
+        if st.button("📊 Generate Performance Analysis Plan"):
+            with st.spinner("Creating analysis plan..."):
+                system_prompt = "You are an Etsy analytics expert. Develop data-driven optimization strategies."
+                user_prompt = f"""
+                Product: {get_form_data('product_description')}
+                Category: {get_form_data('product_category')}
+                Analysis Period: {analysis_period}
+                
+                Create comprehensive analytics and optimization plan for this product:
+                1. Key metrics to track
+                2. Etsy Stats usage guide
+                3. A/B testing suggestions (title, price, images)
+                4. Competitor analysis methods
+                5. Seasonal trend evaluation
+                6. Performance improvement action plan
+                7. Success indicators and targets
+                8. Data collection and reporting strategy
+                """
+                
+                result = call_openai(system_prompt, user_prompt, max_tokens=1200)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+
+
+def render_step_13():
+    """Render Step 13: Order Management"""
+    st.markdown('<div class="step-header">📦 Adım 13: Sipariş Yönetimi</div>' if st.session_state['language'] == 'tr' else '<div class="step-header">📦 Step 13: Order Management</div>', unsafe_allow_html=True)
+    
+    if st.session_state['language'] == 'tr':
+        st.markdown("""
+        <div class="tip-box">
+        📦 <strong>POD İpuçları:</strong><br>
+        • Üretim sürelerini net belirtin<br>
+        • Kalite kontrol süreci oluşturun<br>
+        • Müşteri iletişimini güçlendirin<br>
+        • Kargo takibi sağlayın
+        </div>
+        """, unsafe_allow_html=True)
+        
+        pod_provider = st.selectbox(
+            "POD sağlayıcısı:",
+            ["Printful", "Printify", "Gooten", "SPOD", "Print on Demand", "Diğer"]
+        )
+        
+        product_type = st.selectbox(
+            "Ürün tipi:",
+            ["T-shirt", "Hoodie", "Mug", "Poster", "Phone Case", "Tote Bag", "Pillow"]
+        )
+        
+        if st.button("📦 Sipariş Yönetim Sistemi Oluştur"):
+            with st.spinner("Sipariş yönetim planı hazırlanıyor..."):
+                system_prompt = "Sen bir POD (Print on Demand) ve sipariş yönetimi uzmanısın. Verimli süreçler tasarlıyorsun."
+                user_prompt = f"""
+                Ürün: {get_form_data('product_description')}
+                POD Sağlayıcısı: {pod_provider}
+                Ürün Tipi: {product_type}
+                
+                Bu ürün için kapsamlı sipariş yönetim sistemi oluştur:
+                1. POD entegrasyon rehberi
+                2. Sipariş işlem adımları
+                3. Kalite kontrol süreci
+                4. Müşteri iletişim şablonları
+                5. Kargo ve teslimat yönetimi
+                6. İade ve değişim politikaları
+                7. Envanter takip sistemi
+                8. Müşteri memnuniyeti stratejileri
+                9. Otomasyon önerileri
+                10. Sorun çözme rehberi
+                """
+                
+                result = call_openai(system_prompt, user_prompt, max_tokens=1500)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+    else:
+        st.markdown("""
+        <div class="tip-box">
+        📦 <strong>POD Tips:</strong><br>
+        • Clearly define production times<br>
+        • Create quality control process<br>
+        • Strengthen customer communication<br>
+        • Provide shipment tracking
+        </div>
+        """, unsafe_allow_html=True)
+        
+        pod_provider = st.selectbox(
+            "POD provider:",
+            ["Printful", "Printify", "Gooten", "SPOD", "Print on Demand", "Other"]
+        )
+        
+        product_type = st.selectbox(
+            "Product type:",
+            ["T-shirt", "Hoodie", "Mug", "Poster", "Phone Case", "Tote Bag", "Pillow"]
+        )
+        
+        if st.button("📦 Create Order Management System"):
+            with st.spinner("Creating order management plan..."):
+                system_prompt = "You are a POD (Print on Demand) and order management expert. Design efficient processes."
+                user_prompt = f"""
+                Product: {get_form_data('product_description')}
+                POD Provider: {pod_provider}
+                Product Type: {product_type}
+                
+                Create comprehensive order management system for this product:
+                1. POD integration guide
+                2. Order processing steps
+                3. Quality control process
+                4. Customer communication templates
+                5. Shipping and delivery management
+                6. Return and exchange policies
+                7. Inventory tracking system
+                8. Customer satisfaction strategies
+                9. Automation recommendations
+                10. Problem-solving guide
+                """
+                
+                result = call_openai(system_prompt, user_prompt, max_tokens=1500)
+                if result:
+                    st.markdown(f'<div class="ai-output">{result}</div>', unsafe_allow_html=True)
+
+
 def render_remaining_steps(step_number):
     """Render placeholder for remaining steps"""
     step_titles = {
@@ -725,11 +1243,24 @@ def main():
         
     with tabs[6]:  # Step 7
         render_step_7()
-    
-    # Remaining steps (8-13)
-    for i in range(7, 13):
-        with tabs[i]:
-            render_remaining_steps(i + 1)
+        
+    with tabs[7]:  # Step 8
+        render_step_8()
+        
+    with tabs[8]:  # Step 9
+        render_step_9()
+        
+    with tabs[9]:  # Step 10
+        render_step_10()
+        
+    with tabs[10]:  # Step 11
+        render_step_11()
+        
+    with tabs[11]:  # Step 12
+        render_step_12()
+        
+    with tabs[12]:  # Step 13
+        render_step_13()
     
     # Footer
     st.markdown("---")
